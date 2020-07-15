@@ -15,9 +15,17 @@ cat << EOF >> /root/.transcendence/transcendence.conf
 rpcuser=user`shuf -i 100000-10000000 -n 1`
 rpcpassword=pass`shuf -i 100000-10000000 -n 1`
 rpcallowip=127.0.0.1
-rpcport=8351
+rpcport=5520
 listen=1
 server=1
 daemon=1
-maxconnections=16
+masternode=1
+maxconnections=32
+dbcache=50
+maxorphantx=5
+maxmempool=100
+bind=:8051
+externalip=
+masternodeaddr=:8051
+masternodeprivkey=
 EOF
