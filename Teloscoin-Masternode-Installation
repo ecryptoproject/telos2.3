@@ -1,0 +1,187 @@
+Masternode Setup Guide
+
+Contents
+Introduction
+Installation of your PC/Control wallet
+VPS Remote wallet installation
+Masternode configuration
+Masternode start
+Introduction
+
+This tutorial will guide you in detail through the steps necessary to setup a Teloscoin masternode on Ubuntu 18.04 64-bit remote server (VPS) that is controlled via your local PC wallet. Your local wallet is not required to be kept open all the time whilst collecting masternode rewards.
+
+Requirements:
+Local system – your computer, which will run Control wallet and hold the masternode coins
+VPS with Ubuntu Server 18.04 64-bit OS and unique IPv4 address that is running 24/7
+Minimum VPS specs: 20 GB of storage space, 4 GB of RAM, at least 2 vCPU core
+Latest Teloscoin Core wallet release (https://github.com/phoenixkonsole/tr...leases/tag/2.3)
+Collateral - Amount of coins that should be locked in Control wallet to run Masternode:
+Tier 1: 100 000 Telos coins
+Tier 2: 300 000 Telos coins
+Tier 3: 1 000 000 Telos coins
+Tier 4: 3 000 000 Telos coins
+Tier 5: 10 000 000 Telos coins
+(NOTE: You will need a different IPv4 address for each masternode you plan to host, which means only one masternode per VPS. IPv6 not supported.)
+
+Installation of your PC/Control wallet
+
+Step 1 – Download wallet
+
+Download the most recent version of Teloscoin wallet for your operating system: (https://github.com/phoenixkonsole/tr...leases/tag/2.3)
+
+Step 2 – Extract and install the wallet
+
+Choose the proper version for your operating system. Extract it, install and run the wallet. After starting the wallet for the first time, it will offer you to make a default data directory. It is recommended that you make new folder where control wallet data will be stored. Choose newly made directory on this step.
+
+Step 3 – Download the latest snapshot/bootstrap
+
+This is entirely optional step. But, since this would take longer than downloading the latest blockchain snapshot, there is a way to speed up the synchronization by downloading the latest snapshot (https://github.com/ZenH2O/001/releas...test/telos.zip).
+
+Step 4 – Create a Masternode on PC/Control wallet
+
+First of all, make sure that you have enough Teloscoins in your wallet for Masternode collateral.
+Unlock the wallet (If it is encrypted by password.)
+Create new address labeled with something like “Masternode01” or “MN01”
+Send exact amount of collateral coins to this address (100k, 300k, 1m, 3m or 10m Teloscoins)
+Go to installation folder and open file masternode.conf
+Add line for Masternode configuration:
+<alias> <vpsIP:8051> <masternodeprivkey> <txid> <index>
+alias = MN01
+vpsIP:8051 = IP address of your VPS and Telos masternode port
+masternodeprivkey = Get it on Control wallet console by typing "masternode genkey"
+txid (transaction hash) = Get it on Control wallet console by typing "masternode outputs"
+index (output index) = Above command will give you transaction hash with output index too
+Save masternode.conf file and close it
+Restart PC/Control wallet
+Now your coins are locked for Masternode Tier
+
+VPS Remote wallet installation
+
+To be able to access a VPS, you need a software/SSH client like PuTTY for example. After you successfully login to your VPS, follow the further steps.
+
+Step 1 – Install most recent security patches and firewall
+
+A clean server install will need some software updates. Enter the following command which will bring the system up to date:
+
+Code:
+sudo apt-get update && sudo apt-get -y upgrade
+One of the important steps is to check firewall and setup Masternode port:
+
+Code:
+ufw status - check firewall status
+Code:
+sudo ufw allow 8051/tcp
+- setting up Masternode port
+
+Code:
+sudo ufw enable
+- enable firewall
+
+
+Step 2 – Download and extract Core wallet for Linux
+
+Enter the following command lines one by one to download and extract wallet (from official Teloscoin github):
+
+Code:
+cd ~ && wget https://github.com/phoenixkonsole/transcendence/releases/download/2.3/Linux.zip
+Code:
+apt install unzip
+Code:
+unzip Linux.zip && sudo rm -f Linux.zip
+
+Masternode Configuration
+
+
+Step 3 – Create the masternode configuration file and populate
+
+Before the node can operate as a masternode a custom configuration file needs to be created. Since we have not loaded the wallet yet, we will create the necessary directories and the configuration file by typing the following command lines one by one:
+
+Code:
+mkdir ~/.transcendence && cd ~/.transcendence && sudo apt-get install nano && touch transcendence.conf && nano transcendence.conf
+This command has created a blank configuration file of where we will enter our masternode configuration variables. Now we should properly setup configuration settings.
+
+Paste the following configuration settings into the editor (paste is being done simply by right mouse click), your conf file on your VPS should look like:
+
+HTML Code:
+rpcuser=<YOUR_OWN_RPC_USERNAME>
+rpcpassword=<YOUR_OWN_RPC_PASSWORD>
+rpcallowip=127.0.0.1
+server=1
+daemon=1
+logtimestamps=1
+maxconnections=32
+masternode=1
+externalip=<IP of your VPS>
+masternodeaddr=<IP of your VPS:8051>
+masternodeprivkey=<Masternode genkey already created in Control wallet console>
+Save and exit the editor by pressing CTRL-O and Enter to save, and CTRL-X to exit the editor.
+
+Step 4 – Download the latest snapshot
+
+Same as couple steps earlier, this step is entirely optional. If you don’t want to go slower, download snapshot/bootstrap. Type wget and paste the link address afterwards that you copied earlier and press enter, it should look similar to:
+
+Code:
+wget https://github.com/ZenH2O/001/releases/download/Latest/telos.zip
+(Keep in mind that you need to be into .transcendence folder while download and unzip bootstrap)
+
+Wait for the snapshot to download completely. It might take some time, depending on your VPS download speed and size. After the download is complete, you have to unzip the file. Easy way is to type unzip and just copy-paste the name extracted from the end of link address used earlier above:
+
+Code:
+unzip telos.zip
+After it’s successfully extracted, it is recommended to remove the .zip file to free some space on VPS:
+
+Code:
+rm telos.zip
+
+Masternode start
+
+
+Step 5 – Load the masternode
+
+With the configuration created we are now ready to load the masternode and sync to the network. Load the masternode by typing the following command:
+
+Code:
+./transcendenced -daemon
+(here we starting the daemon)
+
+You will get the message “server starting”. To follow the progress until the wallet is fully loaded and synchronized, type:
+
+Code:
+tail -f ~/.transcendence/debug.log
+Wait until you see the message similar to:
+
+Code:
+2025-05-15 13:31:01 CMasternodeSync::GetNextAsset – Sync has finished
+Code:
+2025-05-15 13:31:01 CActiveMasternode::ManageStatus() – not capable: Hot node, waiting for remote activation.
+Once you get this message, you are completely synced and masternode is ready to be started. Press CTRL-C to get back to command line.
+
+You can get info of running daemon by:
+
+Code:
+./transcendence-cli getinfo
+You will get back information where in line “block” you can see recent block count. To be sure daemon is on right chain type:
+
+Code:
+./transcendence-cli getblockhash <block number>
+and compare result of block hash on some explorers:
+
+https://explorer.teloscoin.org/
+
+Step 6 - Start Masternode from Control wallet (final step)
+
+Now when we have fully synced Masternode on our VPS it is time to start it from Control wallet. To do this go to wallet console and type:
+
+Code:
+startmasternode alias false <your MN alias>
+Step 7 - Final check
+
+If everything went well, you should receive the following message:
+
+“Masternode successfully started”
+
+Also we check on our VPS with command:
+
+./transcendence-cli getmasternodestatus
+
+“Masternode successfully started”
